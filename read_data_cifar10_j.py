@@ -47,51 +47,62 @@ def classify_embedding():
     import classification_based
     class_labels = unpickle('cifar-10-batches-py/batches.meta')['label_names']
     # print class_labels
-    Y_8_train = np.array(Y_train)
-    X_8_train = np.array(X_train)
+    Y_GO_train = np.array(Y_train)
+    X_GO_train = np.array(X_train)
 
-    removed_indices = np.where(Y_8_train!=8)
-    Y_8_train = Y_8_train[removed_indices]
-    X_8_train = X_8_train[removed_indices]
-    removed_indices = np.where(Y_8_train!=9)
-    Y_8_train = Y_8_train[removed_indices]
-    X_8_train = X_8_train[removed_indices]
+    #removed_indices = np.where(Y_8_train!=8)
+    #Y_8_train = Y_8_train[removed_indices]
+    #X_8_train = X_8_train[removed_indices]
+    #removed_indices = np.where(Y_8_train!=9)
+    #Y_8_train = Y_8_train[removed_indices]
+    #X_8_train = X_8_train[removed_indices]
 
     enc = OneHotEncoder(sparse=False)
-    Y_8_train = enc.fit_transform(np.array(Y_8_train).reshape(-1,1))
+    Y_GO_train = enc.fit_transform(np.array(Y_GO_train).reshape(-1,1))
 
-    Y_8_validation = np.array(Y_validation)
-    X_8_validation = np.array(X_validation)
+    Y_GO_validation = np.array(Y_validation)
+    X_GO_validation = np.array(X_validation)
 
-    removed_indices = np.where(Y_8_validation!=8)
-    Y_8_validation = Y_8_validation[removed_indices]
-    X_8_validation = X_8_validation[removed_indices]
-    removed_indices = np.where(Y_8_validation!=9)
-    Y_8_validation = Y_8_validation[removed_indices]
-    X_8_validation = X_8_validation[removed_indices]
+    #removed_indices = np.where(Y_8_validation!=8)
+    #Y_8_validation = Y_8_validation[removed_indices]
+    #X_8_validation = X_8_validation[removed_indices]
+    #removed_indices = np.where(Y_8_validation!=9)
+    #Y_8_validation = Y_8_validation[removed_indices]
+    #X_8_validation = X_8_validation[removed_indices]
 
-    Y_8_validation = enc.fit_transform(np.array(Y_8_validation).reshape(-1,1))
+    Y_GO_validation = enc.fit_transform(np.array(Y_GO_validation).reshape(-1,1))
 
-    classification_based.train(X_8_train, Y_8_train, X_8_validation, Y_8_validation)
+    classification_based.train(X_GO_train, Y_GO_train, X_GO_validation, Y_GO_validation)
 
-    Y_2_validation = np.array(Y_validation)
-    X_2_validation = np.array(X_validation)
+    #Y_2_validation = np.array(Y_validation)
+    #X_2_validation = np.array(X_validation)
 
-    indices = np.where(Y_2_validation>=8)
-    Y_2_validation = Y_2_validation[indices]
-    X_2_validation = X_2_validation[indices]
+    #indices = np.where(Y_2_validation>=8)
+    #Y_2_validation = Y_2_validation[indices]
+    #X_2_validation = X_2_validation[indices]
 
-    validaiton_probab = classification_based.predict_probabilites(X_2_validation)
+    validaiton_probab = classification_based.predict_probabilites(X_GO_validation)
+    print validaiton_probab.shape
+    print validaiton_probab[0]
+    print Y_GO_validation[0]
     weights = []
-    for i in class_labels[:-2]:
+    for i in class_labels:
         weights.append(embeddings[i])
     weights = np.array(weights, dtype=np.float32)
 
     validaiton_embeddings = np.dot(validaiton_probab, weights)
-
+    print validaiton_embeddings.shape
     targets_embeddings = []
+    targets_embeddings_words = []
     for i in class_labels:
         targets_embeddings.append(embeddings[i])
+        targets_embeddings_words.append(i)
+
+    for k in embeddings:
+        if k not in class_labels:
+            targets_embeddings.append(embeddings[k])
+            targets_embeddings_words.append(k)
+
     targets_embeddings = np.array(targets_embeddings, dtype=np.float32)
 
     from sklearn.neighbors import KNeighborsClassifier
@@ -101,8 +112,11 @@ def classify_embedding():
     for i in validaiton_embeddings:
         cos = []
         for j in targets_embeddings:
-            val = cosine(i,j)
+            val = 1 - cosine(i,j)
             cos.append(val)
+
+        #vec = np.zeros(len(targets_embeddings))
+        #vec[np.argmax(cos)] = 1
         Y_pred_validation.append(np.argmax(cos))
 
     # neigh = KNeighborsClassifier(n_neighbors=1)
@@ -110,7 +124,7 @@ def classify_embedding():
     # Y_pred_validation = neigh.predict(validaiton_embeddings)
     # print Y_2_validation
     # print Y_pred_validation
-    print accuracy_score(Y_2_validation, Y_pred_validation)
+    print accuracy_score(np.argmax(Y_GO_validation,axis=1), Y_pred_validation)
 
     #for i,j in zip(Y_2_validation, Y_pred_validation):
     #    print (i,j)
@@ -118,39 +132,46 @@ def classify_embedding():
 def regression_embedding():
     import regression_based
     class_labels = unpickle('cifar-10-batches-py/batches.meta')['label_names']
-    print class_labels
-    Y_8_train = np.array(Y_train)
-    X_8_train = np.array(X_train)
-    print Y_8_train[:10]
-    print X_8_train[:10]
-    removed_indices = np.where(Y_8_train!=1)
-    Y_8_train = Y_8_train[removed_indices]
-    X_8_train = X_8_train[removed_indices]
-    removed_indices = np.where(Y_8_train!=4)
-    Y_8_train = Y_8_train[removed_indices]
-    X_8_train = X_8_train[removed_indices]
+    #Y_8_train = np.array(Y_train)
+    #X_8_train = np.array(X_train)
+    #removed_indices = np.where(Y_8_train!=1)
+    #Y_8_train = Y_8_train[removed_indices]
+    #X_8_train = X_8_train[removed_indices]
+    #removed_indices = np.where(Y_8_train!=4)
+    #Y_8_train = Y_8_train[removed_indices]
+    #X_8_train = X_8_train[removed_indices]
+    Y_GO_train = np.array(Y_train)
+    X_GO_train = np.array(X_train)
+    Y_GO_test = np.array(Y_validation)
+    X_GO_test = np.array(X_validation)
+    #Y_8_train = [embeddings[class_labels[i]] for i in Y_8_train]
+    Y_GO_train = [embeddings[class_labels[i]] for i in np.array(Y_GO_train)]
 
-    Y_8_train = [embeddings[class_labels[i]] for i in Y_8_train]
-
-    Y_8_validation = np.array(Y_validation)
-    X_8_validation = np.array(X_validation)
+    #Y_8_validation = np.array(Y_validation)
+    #X_8_validation = np.array(X_validation)
 
 
-    regression_based.train(X_8_train, Y_8_train)
+    regression_based.train(X_GO_train, Y_GO_train)
 
-    Y_2_validation = np.array(Y_validation)
-    X_2_validation = np.array(X_validation)
+    #Y_2_validation = np.array(Y_validation)
+    #X_2_validation = np.array(X_validation)
 
-    indices = np.where(np.logical_or(Y_2_validation==1 ,Y_2_validation==4))
-    Y_2_validation = Y_2_validation[indices]
-    X_2_validation = X_2_validation[indices]
+    #indices = np.where(np.logical_or(Y_2_validation==1 ,Y_2_validation==4))
+    #Y_2_validation = Y_2_validation[indices]
+    #X_2_validation = X_2_validation[indices]
 
-    validaiton_embeddings = regression_based.predict(X_2_validation)
+    validaiton_embeddings = regression_based.predict(X_GO_test)
 
+    targets_embeddings_words = []
     targets_embeddings = []
-    # for i in class_labels:
-    for i in ['automobile', 'deer']:
+    for i in class_labels:
         targets_embeddings.append(embeddings[i])
+        targets_embeddings_words.append(i)
+
+    for k in embeddings:
+        if k not in class_labels:
+            targets_embeddings.append(embeddings[k])
+            targets_embeddings_words.append(k)
     targets_embeddings = np.array(targets_embeddings, dtype=np.float32)
 
     from sklearn.neighbors import KNeighborsClassifier
@@ -165,11 +186,17 @@ def regression_embedding():
     #     Y_pred_validation.append(np.argmax(cos))
     #
     neigh = KNeighborsClassifier(n_neighbors=1)
-    neigh.fit(targets_embeddings, [1,4])
-    Y_pred_validation = neigh.predict(validaiton_embeddings)
+    print len(targets_embeddings)
+    neigh.fit(targets_embeddings, range(0,len(targets_embeddings)))
+    Y_pred_validation = neigh.predict([validaiton_embeddings[0]])
+    print Y_pred_validation
+    neighbors = neigh.kneighbors([validaiton_embeddings[0]],20,return_distance=False)
+    print neighbors
+    for n in neighbors[0]:
+        print targets_embeddings_words[n]
     # print Y_2_validation
     # print Y_pred_validation
-    print accuracy_score(Y_2_validation, Y_pred_validation)
+    #print accuracy_score([Y_GO_test[0]], Y_pred_validation)
 
 
     # data = np.vstack((validaiton_embeddings, targets_embeddings))
@@ -185,5 +212,5 @@ def regression_embedding():
     # plt.clim(-0.5, 9.5)
     # plt.show()
 
-regression_embedding()
-#classify_embedding()
+#regression_embedding()
+classify_embedding()

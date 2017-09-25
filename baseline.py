@@ -1,9 +1,11 @@
 import tensorflow as tf
 import random
 
+dim_j = 100
+
 sess = tf.InteractiveSession()
 x = tf.placeholder(tf.float32, shape=[None, 32,32,3])
-y_ = tf.placeholder(tf.float32, shape=[None, 10])
+y_ = tf.placeholder(tf.float32, shape=[None, dim_j])
 lr = tf.placeholder(tf.float32)
 
 
@@ -56,8 +58,8 @@ b_fc2 = bias_variable([4096])
 h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
 
-W_fc3 = weight_variable([4096, 10])
-b_fc3 = bias_variable([10])
+W_fc3 = weight_variable([4096, dim_j])
+b_fc3 = bias_variable([dim_j])
 
 y_conv=tf.nn.softmax(tf.matmul(h_fc2_drop, W_fc3) + b_fc3)
 
